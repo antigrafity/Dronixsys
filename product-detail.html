@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Product Detail | Dronixsys</title>
+<meta name="description" content="Explore detailed specifications, key features, and capabilities of Dronixsys technology products." />
+<meta name="theme-color" content="#181B21" />
+<link rel="icon" href="assets/dronixsys-dark.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="scroll-progress"></div>
+
+<header class="nav nav--solid" id="nav">
+  <div class="container nav__inner">
+    <a href="index.html" class="nav__logo" aria-label="Dronixsys home">
+      <span class="logo-mark">
+        <img src="assets/dronixsys-light.png" alt="Dronixsys" class="logo--white" />
+        <img src="assets/dronixsys-dark.png" alt="Dronixsys" class="logo--dark" />
+      </span>
+    </a>
+    <nav class="nav__menu" id="menu" aria-label="Primary">
+      <a href="index.html" class="nav__link">Home</a>
+      <a href="about.html" class="nav__link">About Us</a>
+      <a href="solutions.html" class="nav__link">Our Solutions</a>
+      <a href="products.html" class="nav__link active">Products</a>
+      <a href="contact.html" class="btn btn--primary nav__cta">Contact Us</a>
+    </nav>
+    <button class="nav__toggle" id="toggle" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div id="productDetail">
+  <section class="page-hero" style="padding:150px 0 60px">
+    <div class="page-hero__grid"></div>
+    <div class="container page-hero__inner">
+      <div class="crumbs"><a href="index.html">Home</a> / <a href="products.html">Products</a> / <span id="pdCrumb">Product</span></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:70px">
+    <div class="container">
+      <div class="pd-top" id="pdMain"></div>
+      <div class="pd-grid">
+        <div class="reveal" id="pdFeatures"></div>
+        <div class="reveal d1" id="pdSpecs"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-slate" id="pdRelated"></section>
+</div>
+
+<!-- CTA -->
+<section class="finalcta">
+  <div class="container">
+    <span class="eyebrow" style="justify-content:center; color:#ff8a8a">Interested?</span>
+    <h2>Request a quote or talk to our team.</h2>
+    <p>We'll help you understand how this product fits your operational needs.</p>
+    <div class="hero__cta"><a href="contact.html" class="btn btn--primary btn--lg">Request a Quote</a><a href="products.html" class="btn btn--ghost btn--lg">All Products</a></div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <div class="footer__logo"><img src="assets/dronixsys-light.png" alt="Dronixsys" /></div>
+        <p>IT Consulting, System Integration, and Software Development — helping businesses plan, connect, and build reliable technology worldwide.</p>
+      </div>
+      <div class="footer__col"><h5>Quick Access</h5><a href="index.html">Home</a><a href="about.html">About Us</a><a href="solutions.html">Our Solutions</a><a href="products.html">Products</a><a href="contact.html">Contact</a></div>
+      <div class="footer__col"><h5>Products</h5><a href="products.html">Featured Products</a><a href="products.html">All Products</a><a href="contact.html">Request Quote</a></div>
+      <div class="footer__col"><h5>Company</h5><a href="about.html">About Us</a><a href="about.html#values">Our Values</a><a href="contact.html">Contact</a></div>
+    </div>
+    <div class="footer__bottom">
+      <p>&copy; <span id="year">2026</span> Dronixsys. All rights reserved.</p>
+      <div style="display:flex; gap:22px"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div>
+    </div>
+  </div>
+</footer>
+<script src="js/products-data.js"></script>
+<script src="js/product-detail.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
