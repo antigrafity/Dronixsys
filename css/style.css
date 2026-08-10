@@ -431,6 +431,9 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; letter-spa
   .footer__top { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 860px) {
+  .hero { align-items: flex-start; }
+  .hero__inner { padding-top: 110px; }
+  .hero__sub { margin: 18px 0 26px; }
   .nav__menu { position: fixed; inset: 0 0 0 auto; width: min(320px, 82vw); background: var(--navy-900); flex-direction: column; align-items: stretch; padding: 100px 24px 40px; gap: 6px; transform: translateX(100%); transition: transform .4s var(--ease); box-shadow: -20px 0 60px rgba(0,0,0,.4); }
   .nav__menu.open { transform: none; }
   .nav__menu .nav__link { color: #fff !important; font-size: 1.05rem; padding: 14px 16px; }
@@ -595,6 +598,9 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; letter-spa
 
 /* keep centered leads visually centered but justified within their column */
 .center .section-lead { text-align: justify; }
+
+/* product cards read cleaner left-aligned without word-breaking hyphens */
+.prod-card__body p { text-align: left; -webkit-hyphens: none; hyphens: none; }
 @media (max-width: 620px) {
   .prose p, .section-lead, .card p, .cap__body p, .sol-card p,
   .prod-card__body p, .info-card p, .pd-desc, .hero__sub,

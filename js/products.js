@@ -5,8 +5,31 @@
   "use strict";
   const data = window.DRONIXSYS_PRODUCTS || [];
   const cats = window.DRONIXSYS_CATEGORIES || {};
+  const groups = window.DRONIXSYS_GROUPS || {};
   const grid = document.getElementById("productsGrid");
   if (!grid) return;
+
+  // Collapse grouped products (e.g. NOVAIR family) into a single catalog entry.
+  const seenGroups = new Set();
+  const catalog = [];
+  data.forEach((p) => {
+    if (p.group) {
+      if (seenGroups.has(p.group)) return;
+      seenGroups.add(p.group);
+      const g = groups[p.group] || {};
+      catalog.push({
+        isGroup: true,
+        groupId: p.group,
+        name: g.name || p.group,
+        category: g.category || p.category,
+        collaboration: g.collaboration || p.collaboration,
+        description: g.description || p.description,
+        image: g.image || p.image
+      });
+    } else {
+      catalog.push(p);
+    }
+  });
 
   const searchInput = document.getElementById("searchInput");
   const filterButtons = document.querySelectorAll("[data-filter]");
@@ -22,11 +45,12 @@
   }
 
   function cardHTML(p) {
+    const href = p.isGroup ? `product-detail.html?group=${p.groupId}` : `product-detail.html?id=${p.id}`;
     const collab = p.collaboration
       ? `<span class="prod-collab">In collaboration with ${p.collaboration}</span>` : "";
     return `
       <article class="prod-card reveal">
-        <a class="prod-card__media" href="product-detail.html?id=${p.id}">
+        <a class="prod-card__media" href="${href}">
           <img src="${p.image}" alt="${p.name}" loading="lazy" />
           <span class="prod-card__cat">${cats[p.category] || p.category}</span>
         </a>
@@ -34,13 +58,13 @@
           <h3>${p.name}</h3>
           ${collab}
           <p>${p.description}</p>
-          <a href="product-detail.html?id=${p.id}" class="link-more">View Details ${icon()}</a>
+          <a href="${href}" class="link-more">View Details ${icon()}</a>
         </div>
       </article>`;
   }
 
   function render() {
-    const filtered = data.filter((p) => {
+    const filtered = catalog.filter((p) => {
       const matchCat = !activeCat || p.category === activeCat;
       const matchTerm = !term ||
         p.name.toLowerCase().includes(term) ||
@@ -50,7 +74,7 @@
 
     grid.innerHTML = filtered.map(cardHTML).join("");
     if (resultsCount) resultsCount.textContent = filtered.length;
-    if (totalCount) totalCount.textContent = data.length;
+    if (totalCount) totalCount.textContent = catalog.length;
     if (emptyState) emptyState.style.display = filtered.length ? "none" : "block";
 
     // re-trigger reveal
