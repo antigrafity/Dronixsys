@@ -163,10 +163,10 @@
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(q.x, q.y);
-            ctx.strokeStyle = `rgba(186,26,26,${0.14 * (1 - dist / 130)})`;
+            ctx.strokeStyle = `rgba(180,30,37,${0.14 * (1 - dist / 130)})`;
             ctx.lineWidth = 1;
             ctx.stroke();
-            ctx.strokeStyle = `rgba(160,190,240,${0.1 * (1 - dist / 130)})`;
+            ctx.strokeStyle = `rgba(201,204,211,${0.1 * (1 - dist / 130)})`;
             ctx.stroke();
           }
         }
