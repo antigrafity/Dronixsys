@@ -177,13 +177,50 @@
     window.addEventListener("resize", () => { cancelAnimationFrame(raf); resize(); init(); draw(); });
   }
 
+  /* ---------- Captcha (simple math check) ---------- */
+  function setupCaptcha(field) {
+    const questionEl = field.querySelector("[data-captcha-question]");
+    const input = field.querySelector("[data-captcha-input]");
+    const refreshBtn = field.querySelector("[data-captcha-refresh]");
+    if (!questionEl || !input) return null;
+
+    let answer = 0;
+    function newQuestion() {
+      const a = Math.floor(Math.random() * 10) + 1;
+      const b = Math.floor(Math.random() * 10) + 1;
+      answer = a + b;
+      questionEl.textContent = `${a} + ${b} = ?`;
+      input.value = "";
+      field.classList.remove("is-invalid");
+    }
+    function isValid() {
+      return parseInt(input.value, 10) === answer;
+    }
+
+    if (refreshBtn) refreshBtn.addEventListener("click", newQuestion);
+    newQuestion();
+
+    return { isValid, reset: newQuestion, field };
+  }
+
   /* ---------- Forms (demo submit) ---------- */
   document.querySelectorAll("form[data-demo]").forEach((form) => {
+    const captchaField = form.querySelector(".captcha");
+    const captcha = captchaField ? setupCaptcha(captchaField) : null;
+
     form.addEventListener("submit", (e) => {
       e.preventDefault();
+
+      if (captcha && !captcha.isValid()) {
+        captcha.field.classList.add("is-invalid");
+        captcha.field.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+
       const ok = form.querySelector(".form__ok");
       if (ok) ok.style.display = "block";
       form.querySelectorAll("input, textarea, select").forEach((f) => (f.value = ""));
+      if (captcha) captcha.reset();
       if (ok) setTimeout(() => ok.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
     });
   });
