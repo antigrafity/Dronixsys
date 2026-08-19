@@ -192,17 +192,6 @@
           <div class="field"><label for="gbtype">Business Type</label><input id="gbtype" type="text" placeholder="e.g. Government, Enterprise" /></div>
         </div>
         <div class="field"><label for="gmsg">Message</label><textarea id="gmsg" placeholder="How can we help?"></textarea></div>
-        <div class="field captcha">
-          <label>Security check</label>
-          <div class="captcha__row">
-            <span class="captcha__question" data-captcha-question>? + ? = ?</span>
-            <button type="button" class="captcha__refresh" data-captcha-refresh aria-label="New question">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v6h6M20 20v-6h-6" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 10a8 8 0 0 0-14.9-3M4 14a8 8 0 0 0 14.9 3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <input type="number" inputmode="numeric" class="captcha__input" data-captcha-input required placeholder="Your answer" />
-          </div>
-          <p class="captcha__error" data-captcha-error>Incorrect answer, please try again.</p>
-        </div>
         <button type="submit" class="btn btn--primary btn--lg" style="justify-content:center">Send Message
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>

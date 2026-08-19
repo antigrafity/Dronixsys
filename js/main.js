@@ -177,53 +177,182 @@
     window.addEventListener("resize", () => { cancelAnimationFrame(raf); resize(); init(); draw(); });
   }
 
-  /* ---------- Captcha (simple math check) ---------- */
-  function setupCaptcha(field) {
-    const questionEl = field.querySelector("[data-captcha-question]");
-    const input = field.querySelector("[data-captcha-input]");
-    const refreshBtn = field.querySelector("[data-captcha-refresh]");
-    if (!questionEl || !input) return null;
+  /* ---------- Puzzle Captcha Modal ---------- */
+  (function setupCaptchaModal() {
+    const demoForms = document.querySelectorAll("form[data-demo]");
+    if (!demoForms.length) return;
 
-    let answer = 0;
-    function newQuestion() {
-      const a = Math.floor(Math.random() * 10) + 1;
-      const b = Math.floor(Math.random() * 10) + 1;
-      answer = a + b;
-      questionEl.textContent = `${a} + ${b} = ?`;
-      input.value = "";
-      field.classList.remove("is-invalid");
+    const CW = 240, CH = 130, PIECE = 38, BUMP = 7, TOLERANCE = 5;
+    const IMAGES = [
+      "assets/images/about-us.png",
+      "assets/images/why-choose.png",
+      "assets/images/reliability.png",
+      "assets/images/excellence.png",
+      "assets/images/our-story.png",
+      "assets/images/product-design.png"
+    ];
+
+    const modal = document.createElement("div");
+    modal.className = "captcha-modal";
+    modal.innerHTML = `
+      <div class="captcha-modal__box">
+        <div class="captcha-modal__head">
+          <h3>Security Check</h3>
+          <button type="button" class="captcha-modal__close" aria-label="Close">&times;</button>
+        </div>
+        <p class="captcha-modal__hint">Drag the slider to complete the picture</p>
+        <div class="captcha-stage">
+          <canvas class="captcha-stage__bg" width="${CW}" height="${CH}"></canvas>
+          <canvas class="captcha-stage__piece" width="${CW}" height="${CH}"></canvas>
+        </div>
+        <input type="range" class="captcha-slider" min="0" max="${CW - PIECE}" value="0" step="1" aria-label="Drag to complete the puzzle" />
+        <p class="captcha-modal__msg" aria-live="polite"></p>
+        <button type="button" class="captcha-modal__refresh">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v6h6M20 20v-6h-6" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 10a8 8 0 0 0-14.9-3M4 14a8 8 0 0 0 14.9 3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          New puzzle
+        </button>
+      </div>`;
+    document.body.appendChild(modal);
+
+    const bgCanvas = modal.querySelector(".captcha-stage__bg");
+    const pieceCanvas = modal.querySelector(".captcha-stage__piece");
+    const slider = modal.querySelector(".captcha-slider");
+    const msg = modal.querySelector(".captcha-modal__msg");
+    const closeBtn = modal.querySelector(".captcha-modal__close");
+    const refreshBtn = modal.querySelector(".captcha-modal__refresh");
+    const bgCtx = bgCanvas.getContext("2d");
+    const pieceCtx = pieceCanvas.getContext("2d");
+
+    let gapX = 0, gapY = 0, solved = false, pendingForm = null;
+
+    // Traces a square jigsaw piece with a bump on top and a notch on the left.
+    function tracePiece(ctx, x, y, size, r) {
+      const midX = x + size / 2;
+      const midY = y + size / 2;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(midX - r, y);
+      ctx.arc(midX, y, r, Math.PI, 0, false);
+      ctx.lineTo(x + size, y);
+      ctx.lineTo(x + size, y + size);
+      ctx.lineTo(x, y + size);
+      ctx.lineTo(x, midY + r);
+      ctx.arc(x, midY, r, Math.PI / 2, -Math.PI / 2, true);
+      ctx.lineTo(x, y);
+      ctx.closePath();
     }
-    function isValid() {
-      return parseInt(input.value, 10) === answer;
-    }
 
-    if (refreshBtn) refreshBtn.addEventListener("click", newQuestion);
-    newQuestion();
-
-    return { isValid, reset: newQuestion, field };
-  }
-
-  /* ---------- Forms (demo submit) ---------- */
-  document.querySelectorAll("form[data-demo]").forEach((form) => {
-    const captchaField = form.querySelector(".captcha");
-    const captcha = captchaField ? setupCaptcha(captchaField) : null;
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      if (captcha && !captcha.isValid()) {
-        captcha.field.classList.add("is-invalid");
-        captcha.field.scrollIntoView({ behavior: "smooth", block: "center" });
-        return;
+    function coverParams(img, w, h) {
+      const ir = img.naturalWidth / img.naturalHeight;
+      const cr = w / h;
+      let sw, sh, sx, sy;
+      if (ir > cr) {
+        sh = img.naturalHeight;
+        sw = sh * cr;
+        sx = (img.naturalWidth - sw) / 2;
+        sy = 0;
+      } else {
+        sw = img.naturalWidth;
+        sh = sw / cr;
+        sx = 0;
+        sy = (img.naturalHeight - sh) / 2;
       }
+      return { sx, sy, sw, sh };
+    }
 
+    function newPuzzle() {
+      solved = false;
+      slider.value = 0;
+      slider.disabled = false;
+      msg.textContent = "";
+      msg.className = "captcha-modal__msg";
+      pieceCanvas.style.transform = "translateX(0px)";
+
+      gapX = Math.round(60 + Math.random() * (196 - 60));
+      gapY = Math.round(13 + Math.random() * (86 - 13));
+
+      const src = IMAGES[Math.floor(Math.random() * IMAGES.length)];
+      const img = new Image();
+      img.onload = () => {
+        const { sx, sy, sw, sh } = coverParams(img, CW, CH);
+
+        bgCtx.clearRect(0, 0, CW, CH);
+        bgCtx.drawImage(img, sx, sy, sw, sh, 0, 0, CW, CH);
+        bgCtx.save();
+        tracePiece(bgCtx, gapX, gapY, PIECE, BUMP);
+        bgCtx.fillStyle = "rgba(13,15,19,.65)";
+        bgCtx.fill();
+        bgCtx.strokeStyle = "rgba(255,255,255,.9)";
+        bgCtx.lineWidth = 1.5;
+        bgCtx.stroke();
+        bgCtx.restore();
+
+        pieceCtx.clearRect(0, 0, CW, CH);
+        pieceCtx.save();
+        tracePiece(pieceCtx, 0, gapY, PIECE, BUMP);
+        pieceCtx.clip();
+        pieceCtx.drawImage(img, sx, sy, sw, sh, -gapX, 0, CW, CH);
+        pieceCtx.restore();
+        tracePiece(pieceCtx, 0, gapY, PIECE, BUMP);
+        pieceCtx.strokeStyle = "rgba(255,255,255,.95)";
+        pieceCtx.lineWidth = 1.5;
+        pieceCtx.stroke();
+      };
+      img.src = src;
+    }
+
+    function openCaptcha(form) {
+      pendingForm = form;
+      modal.classList.add("open");
+      newPuzzle();
+    }
+    function closeCaptcha() {
+      modal.classList.remove("open");
+      pendingForm = null;
+    }
+    function finalizeSubmit(form) {
       const ok = form.querySelector(".form__ok");
       if (ok) ok.style.display = "block";
       form.querySelectorAll("input, textarea, select").forEach((f) => (f.value = ""));
-      if (captcha) captcha.reset();
       if (ok) setTimeout(() => ok.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
+    }
+
+    closeBtn.addEventListener("click", closeCaptcha);
+    refreshBtn.addEventListener("click", newPuzzle);
+    modal.addEventListener("click", (e) => { if (e.target === modal) closeCaptcha(); });
+
+    slider.addEventListener("input", () => {
+      pieceCanvas.style.transform = `translateX(${slider.value}px)`;
     });
-  });
+    slider.addEventListener("change", () => {
+      if (solved) return;
+      const val = parseInt(slider.value, 10);
+      if (Math.abs(val - gapX) <= TOLERANCE) {
+        solved = true;
+        slider.disabled = true;
+        pieceCanvas.style.transform = `translateX(${gapX}px)`;
+        msg.textContent = "✓ Verified";
+        msg.className = "captcha-modal__msg is-success";
+        const formToSubmit = pendingForm;
+        setTimeout(() => {
+          closeCaptcha();
+          if (formToSubmit) finalizeSubmit(formToSubmit);
+        }, 600);
+      } else {
+        msg.textContent = "Not quite — try again.";
+        msg.className = "captcha-modal__msg is-error";
+        slider.value = 0;
+        pieceCanvas.style.transform = "translateX(0px)";
+      }
+    });
+
+    demoForms.forEach((form) => {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        openCaptcha(form);
+      });
+    });
+  })();
 
   /* ---------- Footer year ---------- */
   const yearEl = document.getElementById("year");
